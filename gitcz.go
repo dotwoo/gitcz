@@ -19,11 +19,11 @@ type CzType struct {
 }
 
 type CzCommit struct {
-	Type    *CzType
-	Scope   *string
-	Subject *string
-	Body    *string
-	Footer  *string
+	Type       *CzType
+	Scope      *string
+	Subject    *string
+	Body       *string
+	References *string
 }
 
 var StdinInput = bufio.NewReader(os.Stdin)
@@ -32,6 +32,13 @@ var (
 	InputTypePrompt    = "选择或输入一个提交类型(必填): "
 	InputScopePrompt   = "说明本次提交的影响范围(必填): "
 	InputSubjectPrompt = "对本次提交进行简短描述(必填): "
+	InputBodyPrompt    = `详细说明:
+	- 用于解释提交任务的内容和原因，而不是方法
+	- 可以列出要点
+	- 要点使用空格加上连字符，中间用空行分隔.
+	- 连续两个换行结束输入
+	- 选填:`
+	InputReferencesPrompt = "跟踪的问题或需求(选填):"
 )
 
 var CzTypeList = []CzType{
@@ -75,6 +82,9 @@ func main() {
 		false,
 		"关于本软件开发者",
 	)
+	isFull := flag.Bool("f", false, "完整信息,包含正文和引用")
+	isRefer := flag.Bool("r", false, "补充关联问题或需求")
+
 	flag.Parse()
 	if *author {
 		Author()
@@ -84,6 +94,15 @@ func main() {
 	czCommit.Type = InputType()
 	czCommit.Scope = InputScope()
 	czCommit.Subject = InputSubject()
+
+	if *isFull {
+		czCommit.Body = InputBody()
+	}
+
+	if *isFull || *isRefer {
+		czCommit.References = InputReferences()
+	}
+
 	commit := GenerateCommit(czCommit)
 	if err := GitCommit(commit); err != nil {
 		log.Println(err)
@@ -166,7 +185,43 @@ func InputSubject() *string {
 		NewLine()
 		return &text
 	}
-	return InputScope()
+	return InputSubject()
+}
+
+func InputBody() *string {
+	fmt.Print(InputBodyPrompt)
+	conLine := 0
+	buf := bytes.NewBufferString("")
+	for {
+		text, _ := StdinInput.ReadString('\n')
+		if text == "\n" {
+			conLine += 1
+		} else {
+			buf.WriteString(text)
+		}
+
+		if conLine >= 2 {
+			break
+		}
+	}
+
+	out := buf.String()
+	if out != "" {
+		NewLine()
+		return &out
+	}
+	return InputBody()
+}
+
+func InputReferences() *string {
+	fmt.Print(InputReferencesPrompt)
+	text, _ := StdinInput.ReadString('\n')
+	text = strings.TrimSpace(text)
+	if text != "" {
+		NewLine()
+		return &text
+	}
+	return InputReferences()
 }
 
 func GenerateCommit(czCommit *CzCommit) string {
@@ -176,12 +231,13 @@ func GenerateCommit(czCommit *CzCommit) string {
 		*czCommit.Scope,
 		*czCommit.Subject,
 	)
+	commit += "\n  "
 	if czCommit.Body != nil {
 		commit += *czCommit.Body
 	}
-	commit += "\n"
-	if czCommit.Footer != nil {
-		commit += *czCommit.Footer
+	commit += "\n  "
+	if czCommit.References != nil {
+		commit += *czCommit.References
 	}
 	return commit
 }
