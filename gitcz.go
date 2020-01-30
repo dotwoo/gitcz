@@ -49,7 +49,7 @@ var CzTypeList = []CzType{
 	},
 	{
 		Type:    "style",
-		Message: "格式变化",
+		Message: "格式、分号缺失等，代码无变动",
 	},
 	{
 		Type:    "refactor",
@@ -61,11 +61,11 @@ var CzTypeList = []CzType{
 	},
 	{
 		Type:    "test",
-		Message: "测试用例",
+		Message: "测试添加、测试重构等，生产代码无变动",
 	},
 	{
 		Type:    "chore",
-		Message: "构建变动",
+		Message: "构建任务更新、程序包管理器配置等，生产代码无变动。",
 	},
 }
 
