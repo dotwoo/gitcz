@@ -21,7 +21,7 @@ go build gitcz.go
 
 # 手动安装
 
-1. 根据系统架构下载为你编译好的[二进制文件](https://github.com/xiaoqidun/gitcz/tree/master/release)
+1. 根据系统架构下载为你编译好的[二进制文件](https://github.com/dotwoo/gitcz/releases)
 2. 将下载好的二进制文件重命名为 gitcz 并保留后缀
 3. 把 gitcz 文件移动到系统 PATH 环境变量中的目录下
 4. windows 外的系统需使用 chmod 命令赋予可执行权限
