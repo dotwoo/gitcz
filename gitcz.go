@@ -134,13 +134,14 @@ func GitCommit(commit string) (err error) {
 	if _, err = tempFile.WriteString(commit); err != nil {
 		return
 	}
-	cmd := exec.Command("git", "commit", "-F", tempFile.Name())
+	cmd := exec.Command("git")
+	cmd.Args = []string{"git", "commit", "-F" + tempFile.Name()}
 	result, err := cmd.CombinedOutput()
 	if err != nil && !strings.ContainsAny(err.Error(), "exit status") {
 		return
-	} else {
-		fmt.Println(string(bytes.TrimSpace(result)))
 	}
+	fmt.Println(string(bytes.TrimSpace(result)))
+
 	return nil
 }
 
@@ -152,10 +153,10 @@ func InputType() *CzType {
 	fmt.Print(InputTypePrompt)
 	text, _ := StdinInput.ReadString('\n')
 	text = strings.TrimSpace(text)
-	selectId, err := strconv.Atoi(text)
-	if err == nil && (selectId > 0 && selectId <= typeNum) {
+	selectID, err := strconv.Atoi(text)
+	if err == nil && (selectID > 0 && selectID <= typeNum) {
 		NewLine()
-		return &CzTypeList[selectId-1]
+		return &CzTypeList[selectID-1]
 	}
 	for i := 0; i < typeNum; i++ {
 		if text == CzTypeList[i].Type {
@@ -195,7 +196,7 @@ func InputBody() *string {
 	for {
 		text, _ := StdinInput.ReadString('\n')
 		if text == "\n" {
-			conLine += 1
+			conLine++
 		} else {
 			buf.WriteString(text)
 		}
@@ -231,11 +232,12 @@ func GenerateCommit(czCommit *CzCommit) string {
 		*czCommit.Scope,
 		*czCommit.Subject,
 	)
-	commit += "\n  "
+	newLine := "\n  "
+	commit += newLine
 	if czCommit.Body != nil {
 		commit += *czCommit.Body
 	}
-	commit += "\n  "
+	commit += newLine
 	if czCommit.References != nil {
 		commit += *czCommit.References
 	}
