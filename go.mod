@@ -1,3 +1,3 @@
-module gitcz
+module github.com/dotwoo/gitcz
 
-go 1.13
+go 1.17
